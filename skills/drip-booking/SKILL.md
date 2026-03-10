@@ -23,7 +23,18 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 
 凭证从环境变量 `DRIP_CLIENT_ID` 和 `DRIP_CLIENT_SECRET` 读取。
 
-## 预约 API 端点（10 个）
+## 二次确认规则
+
+对于会产生副作用的写操作接口（下表中标记 `[确认]` 的接口），**必须先向用户展示即将执行的操作详情，获得用户明确确认后才能执行**。除非用户明确要求"直接执行"或"不需要确认"。
+
+确认流程：
+1. 组装好请求参数后，先向用户展示操作摘要（接口、关键参数、预期效果）
+2. 等待用户确认（如："确认执行"、"好的"、"执行吧"）
+3. 用户确认后才发送请求
+
+## 查询接口（直接执行）
+
+### 预约查询
 
 | 路径 | 说明 |
 |------|------|
@@ -31,25 +42,25 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 | `/booking/getServiceList` | 获取门店预约服务列表 |
 | `/booking/getSpans` | 根据日期获取预约时刻表（可用时段、剩余数） |
 | `/booking/prepareBookingOrder` | 获取下单信息（计算价格、折扣） |
-| `/booking/createBookingOrder` | 创建预约订单 |
-| `/booking/confirmPay` | 确认预约订单支付成功 |
-| `/booking/cancelOrder` | 取消预约 |
-| `/booking/closeOrder` | 关闭未支付的预约订单 |
 | `/booking/getBookingOrder` | 获取预约订单详情 |
 | `/booking/listBookingOrder` | 查询预约订单列表（按时间范围分页） |
 
-## 场地 API 端点（2 个）
+### 场地与客流查询
 
 | 路径 | 说明 |
 |------|------|
 | `/booking/playground/getAll` | 获取门店所有预约场地列表 |
 | `/booking/playground/getBookingRecords` | 获取场地未开始的预约记录列表 |
+| `/people/getStat` | 获取场馆实时客流统计（当前人数、限制人数、拥挤程度） |
 
-## 客流 API 端点（1 个）
+## 写操作接口（需用户确认）
 
 | 路径 | 说明 |
 |------|------|
-| `/people/getStat` | 获取场馆实时客流统计（当前人数、限制人数、拥挤程度） |
+| `/booking/createBookingOrder` | `[确认]` 创建预约订单 |
+| `/booking/confirmPay` | `[确认]` 确认预约订单支付成功 |
+| `/booking/cancelOrder` | `[确认]` 取消预约 |
+| `/booking/closeOrder` | `[确认]` 关闭未支付的预约订单 |
 
 **拥挤程度：** `low`, `medium`, `high`, `full`
 

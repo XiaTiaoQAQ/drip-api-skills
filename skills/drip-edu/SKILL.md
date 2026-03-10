@@ -23,7 +23,11 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 
 凭证从环境变量 `DRIP_CLIENT_ID` 和 `DRIP_CLIENT_SECRET` 读取。
 
-## API 端点（6 个）
+## 二次确认规则
+
+本模块全部为查询接口，可直接执行，无需二次确认。
+
+## API 端点（6 个，全部为查询接口）
 
 | 路径 | 说明 |
 |------|------|

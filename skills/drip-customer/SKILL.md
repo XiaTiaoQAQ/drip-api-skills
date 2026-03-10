@@ -23,28 +23,44 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 
 凭证从环境变量 `DRIP_CLIENT_ID` 和 `DRIP_CLIENT_SECRET` 读取。
 
-## 客户 API 端点（8 个）
+## 二次确认规则
+
+对于会产生副作用的写操作接口（下表中标记 `[确认]` 的接口），**必须先向用户展示即将执行的操作详情，获得用户明确确认后才能执行**。除非用户明确要求"直接执行"或"不需要确认"。
+
+确认流程：
+1. 组装好请求参数后，先向用户展示操作摘要（接口、关键参数、预期效果）
+2. 等待用户确认（如："确认执行"、"好的"、"执行吧"）
+3. 用户确认后才发送请求
+
+## 查询接口（直接执行）
+
+### 客户查询
 
 | 路径 | 说明 |
 |------|------|
 | `/customer/getByMobile` | 根据手机号获取客户信息 |
-| `/customer/registerByMobile` | 根据手机号注册新客户 |
 | `/customer/getExtProps` | 获取所有自定义属性列表 |
 | `/customer/list` | 分批获取客户列表（游标分页） |
-| `/customer/updateProps` | 更新客户属性（内置属性 + 自定义属性） |
 | `/edu/student/getByCustomer` | 获取客户关联的所有学员 |
-| `/edu/student/create` | 创建孩子 |
 | `/edu/student/getChildren` | 获取客户关联的所有孩子 |
 
-**客户可更新的内置属性：** `realName`, `remarkName`, `gender`, `birth`, `province`, `city`, `district`, `adress`, `nickName`, `avatar`
-
-**游标分页说明：** `/customer/list` 使用 `startCursor` 参数，格式为 `createTime|id`
-
-## 会员 API 端点（1 个）
+### 会员查询
 
 | 路径 | 说明 |
 |------|------|
 | `/card/getByMobile` | 根据手机号获取会员卡信息（等级、成长值、有效期） |
+
+**游标分页说明：** `/customer/list` 使用 `startCursor` 参数，格式为 `createTime|id`
+
+## 写操作接口（需用户确认）
+
+| 路径 | 说明 |
+|------|------|
+| `/customer/registerByMobile` | `[确认]` 根据手机号注册新客户 |
+| `/customer/updateProps` | `[确认]` 更新客户属性（内置属性 + 自定义属性） |
+| `/edu/student/create` | `[确认]` 创建孩子 |
+
+**客户可更新的内置属性：** `realName`, `remarkName`, `gender`, `birth`, `province`, `city`, `district`, `adress`, `nickName`, `avatar`
 
 ## 错误码与处理指引
 

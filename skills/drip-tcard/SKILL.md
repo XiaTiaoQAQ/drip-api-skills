@@ -23,25 +23,41 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 
 凭证从环境变量 `DRIP_CLIENT_ID` 和 `DRIP_CLIENT_SECRET` 读取。
 
+## 二次确认规则
+
+对于会产生副作用的写操作接口（下表中标记 `[确认]` 的接口），**必须先向用户展示即将执行的操作详情，获得用户明确确认后才能执行**。除非用户明确要求"直接执行"或"不需要确认"。
+
+确认流程：
+1. 组装好请求参数后，先向用户展示操作摘要（接口、关键参数、预期效果）
+2. 等待用户确认（如："确认执行"、"好的"、"执行吧"）
+3. 用户确认后才发送请求
+
 ## API 端点（15 个）
+
+### 查询接口（直接执行）
 
 | 路径 | 说明 |
 |------|------|
 | `/tcard/getById` | 根据 ID 读取次卡信息 |
 | `/tcard/getByIds` | 批量读取次卡信息 |
 | `/tcard/filter` | 根据条件（类目/服务）过滤次卡 |
-| `/tcard/createOrder` | 创建次卡购买订单（未支付） |
-| `/tcard/confirmOrder` | 确认订单支付成功 |
-| `/tcard/refundOrder` | 次卡订单退款 |
-| `/tcard/use` | 核销（使用）次卡 |
-| `/tcard/send` | 直接发放次卡给客户 |
-| `/tcard/transfer` | 次卡转卡至另一客户 |
 | `/tcard/getUseRecord` | 获取次卡使用记录（分页） |
 | `/tcard/getFetches` | 获取客户已领取的次卡列表 |
 | `/tcard/getFetchCode` | 获取次卡二维码 |
 | `/tcard/getShareRecord` | 获取次卡分享记录 |
-| `/tcard/bindShare` | 绑定次卡分享关系 |
-| `/tcard/unbindShare` | 解除次卡分享关系 |
+
+### 写操作接口（需用户确认）
+
+| 路径 | 说明 |
+|------|------|
+| `/tcard/createOrder` | `[确认]` 创建次卡购买订单（未支付） |
+| `/tcard/confirmOrder` | `[确认]` 确认订单支付成功 |
+| `/tcard/refundOrder` | `[确认]` 次卡订单退款 |
+| `/tcard/use` | `[确认]` 核销（使用）次卡 |
+| `/tcard/send` | `[确认]` 直接发放次卡给客户 |
+| `/tcard/transfer` | `[确认]` 次卡转卡至另一客户 |
+| `/tcard/bindShare` | `[确认]` 绑定次卡分享关系 |
+| `/tcard/unbindShare` | `[确认]` 解除次卡分享关系 |
 
 ## 错误码与处理指引
 

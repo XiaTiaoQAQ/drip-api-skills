@@ -29,6 +29,12 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 - `/customer/list` 使用游标分页（`startCursor` 格式：`createTime|id`）
 - Webhook 回调不包含 `client_id` 参数
 
+## 二次确认规则
+
+对于会产生副作用的写操作接口（创建、修改、删除、核销、退款、发放、转卡等），**必须先向用户展示操作摘要并获得明确确认后才能执行**。除非用户明确要求"直接执行"或"不需要确认"。
+
+查询类接口（get、list、filter、query、count 等只读操作）可直接执行。
+
 ## 错误处理
 
 - `10003`（无效请求）：检查参数格式
