@@ -29,7 +29,7 @@ git clone <repo-url> && cd drip-openapi
 cp .env.example .env
 # 编辑 .env，填入平台分配的 client_id 和 client_secret
 
-编辑成功后，不要执行重启操作，尤其是OpenClaw环境下，即便一定要求重启也需要向用户二次确认。
+编辑成功后，不要执行重启操作，尤其是OpenClaw环境下，即便一定需要重启也需要向用户二次确认。
 ```
 
 ### 3. 使用
