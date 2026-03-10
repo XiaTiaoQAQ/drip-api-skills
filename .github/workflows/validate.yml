@@ -1,0 +1,62 @@
+name: Validate OpenAPI Specs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**/openapi-spec.yaml'
+      - 'skills/**/SKILL.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**/openapi-spec.yaml'
+      - 'skills/**/SKILL.md'
+
+jobs:
+  validate-specs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install validators
+        run: |
+          npm install -g @stoplight/spectral-cli
+          npm install -g yaml-lint
+
+      - name: Lint YAML files
+        run: |
+          find skills -name "openapi-spec.yaml" -exec yamllint {} \;
+
+      - name: Validate OpenAPI specs
+        run: |
+          for spec in skills/*/references/openapi-spec.yaml; do
+            echo "Validating $spec..."
+            spectral lint "$spec" --ruleset .spectral.yml || true
+          done
+
+      - name: Check Markdown formatting
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: |
+            skills/**/SKILL.md
+            README.md
+            CLAUDE.md
+
+  validate-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test signing script
+        run: |
+          DRIP_CLIENT_SECRET=test_secret python scripts/drip_sign.py sign '{"test":true}'

@@ -1,0 +1,1177 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: 智店开放接口
+  description: 智店开放接口，助力商户实现系统深度融合
+  contact:
+    name: service@dripower.com
+    url: 'https://zd.drip.im'
+    email: service@dripower.com
+servers:
+  - url: 'https://zd.drip.im/open/zd'
+tags:
+  - name: 开放接口
+
+paths:
+  /tcard/getById:
+    post:
+      operationId: getById
+      summary: 根据 Id 读取次卡信息
+      description: 商户可通过该接口获取次卡详细信息用于展示
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tcardId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - id
+                          - name
+                          - imgs
+                          - serviceInfo
+                        properties:
+                          id:
+                            type: integer
+                            format: int64
+                            description: 次卡id
+                          locationId:
+                            type: integer
+                            format: int64
+                            description: 所属门店
+                          name:
+                            type: string
+                          imgs:
+                            type: array
+                            items:
+                              type: string
+                          price:
+                            type: integer
+                            format: int64
+                            description: 售价(单位分)
+                          totalValue:
+                            type: integer
+                            format: int64
+                            description: 次卡总价值（单位分）
+                          catIds:
+                            type: array
+                            description: 次卡类目
+                            items:
+                              type: integer
+                          serviceInfo:
+                            type: object
+                            required:
+                              - services
+                            properties:
+                              services:
+                                type: array
+                                items:
+                                  type: object
+                                  required:
+                                    - id
+                                    - name
+                                  properties:
+                                    id:
+                                      type: integer
+                                      format: int64
+                                    name:
+                                      type: string
+                                    count:
+                                      description: 使用总次数
+                                      type: integer
+                                      format: int32
+                          usageInfo:
+                            type: object
+                            description: 次卡使用信息
+                            properties:
+                              description:
+                                type: string
+                                description: 次卡使用说明
+                          expire:
+                            description: 过期信息
+                            oneOf:
+                              - type: object
+                                properties:
+                                  Forever:
+                                    type: object
+                                    description: 长期有效
+                              - type: object
+                                properties:
+                                  ByRange:
+                                    type: object
+                                    description: 时间段内有效
+                                    properties:
+                                      startAt:
+                                        type: string
+                                        example: '2022-09-01 00:00:00'
+                                        description: 开始时间
+                                      endAt:
+                                        type: string
+                                        example: '2022-09-02 00:00:00'
+                                        description: 结束时间
+                              - type: object
+                                properties:
+                                  ByDuration:
+                                    type: object
+                                    description: 领取后一段时间过期
+                                    required:
+                                      - unit
+                                      - duration
+                                    properties:
+                                      unit:
+                                        type: integer
+                                        enum:
+                                          - 1
+                                          - 2
+                                        description: |-
+                                          时长单位
+                                          `1` -- 按天
+                                          `2` -- 按月
+                                      duration:
+                                        type: integer
+                                        description: 时长
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+
+            错误码
+            * `24001` - 次卡不存在
+  /tcard/getByIds:
+    post:
+      operationId: getByIds
+      summary: 批量读取次卡信息
+      description: 商户可通过该接口批量获取次卡详细信息
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tcardIds:
+                  type: array
+                  description: 次卡Id列表
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  result:
+                    type: object
+                    description: 读取结果
+                    properties:
+                      tcards:
+                        description: 次卡列表
+                        type: array
+                        items:
+                          $ref: '#/paths/~1tcard~1getById/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+  /tcard/createOrder:
+    post:
+      operationId: createOrder
+      summary: 创建次卡购买订单
+      description: 创建一条未支付的次卡购买订单
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  description: 客户ID
+                  type: string
+                tcardId:
+                  description: 次卡ID
+                  type: integer
+                  format: int64
+                extTradeNo:
+                  description: 商户唯一订单号
+                  type: string
+                originalFee:
+                  description: 次卡原价
+                  type: integer
+                  format: int64
+                finalFee:
+                  description: 用户实际需支付价格
+                  type: integer
+                  fomrat: int64
+      responses:
+        '200':
+          description: 订单创建结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        properties:
+                          fetchId:
+                            description: 次卡购买记录ID
+                            type: integer
+                            format: int64
+                          orderId:
+                            description: 智店订单号
+                            type: string
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码
+            * `24001` - 次卡不存在
+            * `24002` - 次卡已过期
+            * `24003` - 客户不存在
+            * `24004` - 无效次卡
+            * `24005` - 次卡领取数量超过限制
+  /tcard/confirmOrder:
+    post:
+      operationId: tcardConfirmOrder
+      summary: 确认订单支付成功
+      description: 商户系统确认支付成功后通过该接口修改智店订单状态
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extTradeNo:
+                  description: 商户系统单号
+                  type: string
+                payTime:
+                  description: 用户支付时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+                payType:
+                  description: 支付方式，对应智店后台自定义支付方式
+                  type: string
+                  example: 自定义收款方式
+      responses:
+        '200':
+          description: 订单确认结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+            * `24006` - 订单不存在
+            * `24007` - 无效订单
+            * `24008` - 发放次卡异常
+  /tcard/refundOrder:
+    post:
+      operationId: refundOrder
+      summary: 次卡订单退款
+      description: 商户可通过该接口对次卡订单进行退款操作
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - extTradeNo
+                - amount
+                - reason
+                - invalidateTcard
+              properties:
+                extTradeNo:
+                  description: 商户系统单号
+                  type: string
+                amount:
+                  type: integer
+                  description: 退款金额，单位分
+                reason:
+                  type: string
+                  description: 退款原因
+                invalidateTcard:
+                  type: boolean
+                  description: 是否作废剩余次数
+      responses:
+        '200':
+          description: 退款结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+
+            错误码
+            * `24006` - 次卡订单不存在
+            * `24009` - 当前有退款正在进行
+            * `24010` - 退款金额超出限制
+            * `24011` - 支付方式不支持退款
+            * `24012` - 支付设置错误
+            * `24013` - 退款失败
+  /tcard/filter:
+    post:
+      operationId: filter
+      summary: 根据条件过滤次卡
+      description: 商户可通过指定子类目 id 列表，以及服务，过滤出相应的次卡
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceId:
+                  type: integer
+                  format: int64
+                  description: 服务 id
+                catIds:
+                  type: array
+                  description: 子类目(不存在下级类目) id 列表
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  result:
+                    type: object
+                    description: 读取结果
+                    properties:
+                      tcards:
+                        description: 次卡列表
+                        type: array
+                        items:
+                          $ref: '#/paths/~1tcard~1getById/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+  /tcard/use:
+    post:
+      operationId: Tcard_use
+      summary: 核销次卡
+      description: 使用（核销）次卡
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - fetchId
+                - services
+              properties:
+                staffId:
+                  description: 操作员工id
+                  type: integer
+                  format: int64
+                customerId:
+                  description: 客户ID
+                  type: string
+                fetchId:
+                  description: 次卡领取记录id
+                  type: integer
+                  format: int64
+                useScene:
+                  description: 使用场景说明(不超过512字符)
+                  type: string
+                services:
+                  description: 使用服务详情
+                  type: array
+                  items:
+                    type: object
+                    required: []
+                    properties:
+                      serviceId:
+                        type: integer
+                        description: 服务id
+                      serviceCount:
+                        type: number
+                        description: 服务次数（计时模式支持2位定点小数）
+                      useCount:
+                        type: number
+                        description: 次卡扣除次数（通常等于serviceCount，通卡等场景，可根据抵扣系数计算）
+      responses:
+        '200':
+          description: 使用结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - useId
+                        properties:
+                          useId:
+                            type: integer
+                            description: 使用记录id
+                  - type: object
+                    required:
+                      - success
+                      - code
+                      - msg
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - false
+                      code:
+                        type: integer
+                        description: 错误码
+                      msg:
+                        type: string
+                        description: 错误信息
+        default:
+          description: |-
+            错误码
+            * `24014` 次卡领取记录不存在
+            * `24015` 核销服务不存在
+            * `24016` 服务次数不足
+            * `24017` 领取记录状态错误
+            * `24018` 使用时段错误
+            * `24019` 领取记录已过期
+            * `24020` 次卡使用频率超过限制
+            * `24021` 使用异常
+  /tcard/send:
+    post:
+      operationId: Tcard_send
+      summary: 发放次卡
+      description: 直接发放次卡给客户。注意不会校验领取限制，不触发发卡通知，也不执行赠送逻辑
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - tcardId
+                - services
+              properties:
+                customerId:
+                  description: 客户ID
+                  type: string
+                tcardId:
+                  description: 次卡id
+                  type: integer
+                  format: int64
+                sendScene:
+                  description: 发放场景说明(不超过512字符)
+                  type: string
+                payAmount:
+                  description: 付款金额(分) (用于计算价值，不填默认为0)
+                  type: integer
+      responses:
+        '200':
+          description: 使用结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - fetchId
+                        properties:
+                          fetchId:
+                            type: integer
+                            description: 领取记录id
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+
+            错误码
+            * `24001` 次卡不存在
+            * `24022` 发卡员工不存在
+            * `24023` 发卡员工不合法
+            * `24024` 次卡库存不足
+  /tcard/transfer:
+    post:
+      operationId: Tcard_transfer
+      summary: 次卡转卡
+      description: 转移次卡领取记录至另一位客户
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fetchId
+                - fromCustomerId
+                - toCustomerId
+                - staffId
+              properties:
+                fromCustomerId:
+                  description: 来源客户id
+                  type: string
+                fetchId:
+                  description: 领取记录id
+                  type: integer
+                  format: int64
+                toCustomerId:
+                  description: 目标客户id
+                  type: string
+                staffId:
+                  description: 操作员工id
+                  type: integer
+                remark:
+                  description: 备注
+                  type: string
+      responses:
+        '200':
+          description: 转卡结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+
+            错误码
+            * `24014` 领取记录不存在
+            * `24018` 领取记录状态错误
+            * `24019` 领取记录已过期
+            * `24022` 员工不存在
+            * `24023` 员工不合法
+            * `24025` 转卡目标和来源相同
+  /tcard/getUseRecord:
+    post:
+      operationId: Tcard_getUseRecord
+      summary: 获取使用记录
+      description: 获取次卡领取记录的使用记录
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - fetchId
+                - page
+                - size
+              properties:
+                customerId:
+                  type: string
+                  description: 客户id
+                fetchId:
+                  type: integer
+                  description: 领取记录id
+                page:
+                  type: integer
+                  description: 页码
+                size:
+                  type: integer
+                  description: 每页条数（不超过100）
+      responses:
+        '200':
+          description: 使用记录结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - total
+                          - records
+                        properties:
+                          total:
+                            type: integer
+                            description: 使用记录总数
+                          records:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - type
+                                - createAt
+                                - outerType
+                              properties:
+                                id:
+                                  type: integer
+                                  description: 记录id
+                                type:
+                                  type: integer
+                                  enum:
+                                    - -1
+                                    - 0
+                                    - 1
+                                    - 110
+                                    - 111
+                                    - 112
+                                  description: |-
+
+                                    * `-1` 退款
+                                    * `0`  消耗
+                                    * `1`  充值
+                                    * `110` 转卡
+                                    * `111` 暂停卡
+                                    * `112` 恢复卡
+                                useScene:
+                                  type: string
+                                  description: 使用时传入的使用场景
+                                createAt:
+                                  type: string
+                                  example: '2022-01-01 00:00:00'
+                                outerType:
+                                  type: integer
+                                  enum:
+                                    - 0
+                                    - 1
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 7
+                                    - 8
+                                    - 9
+                                    - 13
+                                  description: |-
+
+                                    * `0` 预约消耗
+                                    * `1` 收银购买
+                                    * `2` 小助手核销
+                                    * `3` 管理员后台操作
+                                    * `4` 门禁核销
+                                    * `5` 课程考勤
+                                    * `6` 收银核销出票
+                                    * `7` 课程扫码签到
+                                    * `8` 课程人脸签到
+                                    * `9` 手环机核销
+                                    * `13` 接口消耗
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+  /tcard/getFetches:
+    post:
+      operationId: Tcard_getFetches
+      summary: 获取客户的次卡列表
+      description: 获取某个客户已领取的次卡记录
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                status:
+                  type: integer
+                  enum:
+                    - 0
+                    - 1
+                    - -1
+                  description: |-
+
+                    * `0`: 有效（包含暂停卡和未激活）
+                    * `1`: 已耗尽
+                    * `-1`: 已失效
+      responses:
+        '200':
+          description: 订单创建结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - fetches
+                        properties:
+                          fetches:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - fetchId
+                                - tcardId
+                                - tcardName
+                                - status
+                                - expiredAt
+                                - createTime
+                                - details
+                              properties:
+                                fetchId:
+                                  type: integer
+                                  format: int64
+                                  description: 次卡领取记录id
+                                tcardId:
+                                  type: integer
+                                  format: int64
+                                  description: 次卡id
+                                tcardName:
+                                  type: 'string,'
+                                  description: 次卡名称
+                                status:
+                                  type: integer
+                                  enum:
+                                    - 1
+                                    - 2
+                                    - -5
+                                    - -1
+                                    - -100
+                                  description: |-
+                                    * `1` 正常
+                                    * `2` 已耗尽
+                                    * `-5` 已暂停
+                                    * `-100` 未激活
+                                startAt:
+                                  type: string
+                                  example: '2000-01-01 00:00:00'
+                                expiredAt:
+                                  type: string
+                                  example: '2000-01-01 00:00:00'
+                                createTime:
+                                  type: string
+                                  example: '2000-01-01 00:00:00'
+                                details:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - serviceId
+                                      - serviceName
+                                      - count
+                                      - unlimited
+                                    properties:
+                                      serviceId:
+                                        type: integer
+                                        format: int64
+                                        description: 服务id
+                                      serviceName:
+                                        type: string
+                                        description: 服务名称
+                                      count:
+                                        type: number
+                                        description: 剩余数量
+                                      unlimited:
+                                        type: boolean
+                                        description: 是否无限次数
+                                outerType:
+                                  type: integer
+                                  enum:
+                                    - 1
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 7
+                                    - 8
+                                    - 9
+                                    - 10
+                                    - 11
+                                    - 12
+                                    - 13
+                                    - 14
+                                    - 15
+                                  description: |-
+
+                                    * `1` 会员升级赠送
+                                    * `2` 推荐开卡赠送
+                                    * `3` 储值赠送
+                                    * `4` 群发营销
+                                    * `5` 购买次卡赠送
+                                    * `6` 小助手售卡
+                                    * `7` 收银购买
+                                    * `8` 线上购买
+                                    * `9` 任务导入
+                                    * `10` 群发任务
+                                    * `11` 精准群发
+                                    * `12` 营销计划
+                                    * `13` 班级报名购买
+                                    * `14` 转卡
+                                    * `15` 接口发卡
+                                sharedFromInfo:
+                                  description: 原卡主信息（若为分享获得）
+                                  type: object
+                                  required:
+                                    - id
+                                    - mobile
+                                  properties:
+                                    id:
+                                      type: string
+                                    name:
+                                      type: string
+                                    mobile:
+                                      type: string
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+  /tcard/getFetchCode:
+    post:
+      operationId: Tcard_getFetchCode
+      summary: 获取次卡二维码
+      description: |
+        根据次卡领取记录ID获取对应的二维码和过期时间。
+
+        **注意用户权限检验!**
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  description: 次卡领取记录ID
+                refresh:
+                  type: boolean
+                  description: 是否立刻刷新，若刷新，则旧二维码会失效。
+      responses:
+        '200':
+          description: 领取码结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - code
+                          - expired
+                        properties:
+                          code:
+                            type: string
+                            description: 次卡二维码
+                          expired:
+                            type: string
+                            format: date-time
+                            example: '2000-01-01 00:00:00'
+                            description: 过期时间
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码
+            * `24014` 领取记录不存在
+  /tcard/getShareRecord:
+    post:
+      operationId: Tcard_getShareRecord
+      summary: 获取次卡分享记录
+      description: 根据领取记录ID，获取该次卡的分享记录
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fetchId:
+                  type: integer
+                  format: int64
+                  description: 次卡领取记录ID
+              required:
+                - fetchId
+      responses:
+        '200':
+          description: 分享记录列表
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - fetchId
+                            - status
+                            - toCustomer
+                            - shareTime
+                          properties:
+                            fetchId:
+                              type: integer
+                              format: int64
+                            status:
+                              type: integer
+                              description: 分享状态
+                            toCustomer:
+                              type: object
+                              required:
+                                - id
+                                - mobile
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                                  nullable: true
+                                mobile:
+                                  type: string
+                                avatar:
+                                  nullable: true
+                                  description: 兼容服务端模型的保留字段（若不存在可忽略）
+                                  oneOf:
+                                    - type: string
+                                    - type: 'null'
+                            shareTime:
+                              type: string
+                              example: '2000-01-01 00:00:00'
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            可能的错误码：
+
+            24001 次卡不存在
+
+            24014 次卡领取记录不存在
+
+            24027 次卡不支持分享
+
+            24029 次卡状态异常
+
+            10004 服务器内部错误
+
+            10003 无效请求
+  /tcard/bindShare:
+    post:
+      operationId: Tcard_bindShare
+      summary: 绑定次卡分享关系
+      description: 为指定的次卡领取记录绑定分享关系
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fromCustomerId
+                - fetchId
+                - toCustomerId
+              properties:
+                fromCustomerId:
+                  type: string
+                  description: 发起分享的客户ID
+                fetchId:
+                  type: integer
+                  format: int64
+                  description: 次卡领取记录ID
+                toCustomerId:
+                  type: string
+                  description: 分享接收方的客户ID
+      responses:
+        '200':
+          description: 绑定结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            可能的错误码：
+
+            24001 次卡不存在
+
+            24014 次卡领取记录不存在
+
+            24027 次卡不支持分享
+
+            24028 次卡分享次数超过限制
+
+            24029 次卡状态异常
+
+            24030 已绑定,请勿重复分享
+
+            24003 客户不存在
+
+            10004 服务器内部错误
+
+            10003 无效请求
+  /tcard/unbindShare:
+    post:
+      operationId: Tcard_unbindShare
+      summary: 解除次卡分享关系
+      description: 解除指定的次卡分享关系
+      tags:
+        - 次卡
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fromCustomerId
+                - fetchId
+                - toCustomerId
+              properties:
+                fromCustomerId:
+                  type: string
+                  description: 分享发起方客户ID
+                fetchId:
+                  type: integer
+                  format: int64
+                  description: 次卡领取记录ID
+                toCustomerId:
+                  type: string
+                  description: 分享接收方客户ID
+      responses:
+        '200':
+          description: 解绑结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            可能的错误码：
+
+            24014 次卡领取记录不存在
+
+            24003 客户不存在
+
+            10004 服务器内部错误
+
+            10003 无效请求

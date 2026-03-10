@@ -1,0 +1,17 @@
+{
+  "name": "drip-openapi",
+  "version": "1.0.0",
+  "description": "水滴智店开放接口 Skill - 支持预约、次卡、会员、教务、积分、订单等 API 调用",
+  "license": "MIT",
+  "author": {
+    "name": "drip-openapi contributors"
+  },
+  "keywords": [
+    "drip",
+    "水滴智店",
+    "openapi",
+    "booking",
+    "tcard",
+    "saas"
+  ]
+}

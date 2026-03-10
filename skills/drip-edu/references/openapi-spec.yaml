@@ -1,0 +1,796 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: 智店开放接口
+  description: 智店开放接口，助力商户实现系统深度融合
+  contact:
+    name: service@dripower.com
+    url: 'https://zd.drip.im'
+    email: service@dripower.com
+servers:
+  - url: 'https://zd.drip.im/open/zd'
+tags:
+  - name: 开放接口
+
+paths:
+  /edu/class/getSchedules:
+    post:
+      operationId: getSchedules
+      summary: 获取课程记录
+      description: 根据 customerId 获取某时间段课程表
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - customerId
+                - minStart
+                - maxStart
+              type: object
+              properties:
+                customerId:
+                  description: 客户id
+                  type: string
+                minStart:
+                  description: 起始时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+                maxStart:
+                  description: 截止时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+      responses:
+        '200':
+          description: 课程结果
+          content:
+            application/json:
+              schema:
+                required:
+                  - success
+                  - result
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  result:
+                    type: object
+                    required:
+                      - items
+                    properties:
+                      schedules:
+                        type: array
+                        items:
+                          $ref: '#/paths/~1edu~1class~1getNextSchedule/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+  /edu/class/getNextSchedule:
+    post:
+      operationId: getNextSchedule
+      summary: 获取最近的课程
+      description: 根据 customerId 获取最近即将开始的课程
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - customerId
+              type: object
+              properties:
+                customerId:
+                  description: 客户id
+                  type: string
+      responses:
+        '200':
+          description: 课程结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - startAt
+                          - endAt
+                          - className
+                          - relatedTeacherIds
+                          - classRoomId
+                        properties:
+                          student:
+                            type: object
+                            description: 学生基础信息
+                            required:
+                              - id
+                              - name
+                              - sex
+                              - type
+                            properties:
+                              id:
+                                type: integer
+                                format: int64
+                              name:
+                                type: string
+                                description: 姓名
+                              nickname:
+                                type: string
+                                description: 昵称
+                              avatar:
+                                type: string
+                                description: 头像地址
+                              sex:
+                                type: integer
+                                enum:
+                                  - 0
+                                  - 1
+                                description: |-
+                                  性别
+                                  * `0` - 男
+                                  * `1` - 女
+                              type:
+                                type: integer
+                                enum:
+                                  - 1
+                                  - 2
+                                description: |
+                                  学员类型
+                                  * `1` - 本人
+                                  * `2` - 孩子
+                          startAt:
+                            type: string
+                            description: 课程开始时间
+                            example: '2000-01-01 00:00:00'
+                          endAt:
+                            type: string
+                            description: 课程结束时间
+                            example: '2000-01-01 00:00:00'
+                          courseName:
+                            type: string
+                            description: 课程名称
+                          courseType:
+                            type: integer
+                            enum:
+                              - 1
+                              - 2
+                            description: |-
+                              课程类型：
+                              * `1` - 预约课
+                              * `2` - 班级排课
+                          relatedTeacherIds:
+                            type: array
+                            description: 课程关联的教师id列表
+                            items:
+                              type: integer
+                              format: int64
+                          classRoomId:
+                            description: 教室id
+                            type: integer
+                            format: int64
+                          nthSchedule:
+                            type: integer
+                            description: 班级排课序号
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码：
+            * `25001` - 暂无课程
+  /edu/class/getDetails:
+    post:
+      operationId: getClassDetails
+      summary: 获取教务排课列表
+      description: 指定日期，读取改日所有所有的班级开课列表
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - locationId
+                - minStart
+                - maxStart
+              type: object
+              properties:
+                locationId:
+                  description: 门店 ID
+                  type: integer
+                  format: int64
+                minStart:
+                  description: 最小开始日期
+                  type: string
+                  format: date
+                maxStart:
+                  description: '最大开始日期（包含当天）,时间间隔必须小于等于7天'
+                  type: string
+                  format: date
+                teacherId:
+                  description: 教师 Id
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 排课结果
+          content:
+            application/json:
+              schema:
+                required:
+                  - success
+                  - result
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  result:
+                    type: object
+                    required:
+                      - items
+                    properties:
+                      details:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - classId
+                            - startAt
+                            - endAt
+                            - courseName
+                            - courseType
+                            - relatedTeacherIds
+                            - classRoomId
+                            - studentCount
+                            - maxStudentCount
+                          properties:
+                            classId:
+                              type: integer
+                              format: int64
+                              description: 班级id
+                            startAt:
+                              type: string
+                              description: 课程开始时间
+                              example: '2000-01-01 00:00:00'
+                            endAt:
+                              type: string
+                              description: 课程结束时间
+                              example: '2000-01-01 00:00:00'
+                            courseName:
+                              type: string
+                              description: 课程名称
+                            courseId:
+                              type: integer
+                              description: 课程（对应的服务）ID
+                            courseType:
+                              type: integer
+                              enum:
+                                - 1
+                                - 2
+                              description: |-
+                                课程类型：
+                                * `1` - 预约课
+                                * `2` - 班级排课
+                            relatedTeacherIds:
+                              type: array
+                              description: 课程关联的教师id列表
+                              items:
+                                type: integer
+                                format: int64
+                            classRoomId:
+                              description: 教室id
+                              type: integer
+                              format: int64
+                            maxStudentCount:
+                              description: 班级允许最大学员人数
+                              type: integer
+                            studentCount:
+                              description: 班级当前学员人数
+                              type: integer
+  /edu/class/listClasses:
+    post:
+      operationId: Class_listClasses
+      summary: 获取班级列表
+      description: 获取班级列表
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - page
+                - size
+              properties:
+                status:
+                  description: 班级状态 (可选)
+                  type: integer
+                locationId:
+                  description: 门店ID (可选)
+                  type: integer
+                  format: int64
+                page:
+                  description: 页码
+                  type: integer
+                size:
+                  description: 每页条数
+                  type: integer
+      responses:
+        '200':
+          description: 班级列表结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - classList
+                        properties:
+                          classList:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - name
+                                - status
+                                - maxStudentCount
+                                - courseId
+                                - locationId
+                              properties:
+                                id:
+                                  type: integer
+                                  format: int64
+                                  description: 班级ID
+                                name:
+                                  type: string
+                                  description: 班级名称
+                                status:
+                                  type: integer
+                                  description: 班级状态
+                                maxStudentCount:
+                                  type: integer
+                                  format: int64
+                                  description: 最大学员数
+                                courseId:
+                                  type: integer
+                                  format: int64
+                                  description: 课程ID
+                                courseName:
+                                  type: string
+                                  description: 课程名称
+                                classroomId:
+                                  type: integer
+                                  format: int64
+                                  description: 教室ID
+                                classRoomName:
+                                  type: string
+                                  description: 教室名称
+                                locationId:
+                                  type: integer
+                                  format: int64
+                                  description: 门店ID
+                                registerEnable:
+                                  type: boolean
+                                  description: 是否允许报名
+                                startAt:
+                                  type: string
+                                  format: date-time
+                                  example: '2000-01-01 00:00:00'
+                                  description: 班级开始时间
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+  /edu/student/getByCustomer:
+    post:
+      operationId: Student_getByCustomer
+      summary: 获取关联学员
+      description: 商户可通过该接口获取 customer 关联的所有学员
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - customerId
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  description: 客户 id
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        description: 读取结果
+                        properties:
+                          students:
+                            description: 学员列表
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - name
+                                - number
+                                - sex
+                                - type
+                                - customerId
+                                - customerMobile
+                              properties:
+                                id:
+                                  type: integer
+                                  format: int64
+                                name:
+                                  type: string
+                                  description: 姓名
+                                number:
+                                  type: string
+                                  description: 学员编号
+                                customerId:
+                                  type: string
+                                  description: 学员所属客户id
+                                customerMobile:
+                                  type: string
+                                  description: 学员所属客户手机
+                                nickname:
+                                  type: string
+                                  description: 昵称
+                                avatar:
+                                  type: string
+                                  description: 头像地址
+                                sex:
+                                  type: integer
+                                  enum:
+                                    - 0
+                                    - 1
+                                  description: |-
+                                    性别
+                                    * `0` - 男
+                                    * `1` - 女
+                                type:
+                                  type: integer
+                                  enum:
+                                    - 1
+                                    - 2
+                                  description: |
+                                    学员类型
+                                    * `1` - 本人
+                                    * `2` - 孩子
+                                birth:
+                                  type: object
+                                  $ref: '#/paths/~1edu~1student~1create/post/requestBody/content/application~1json/schema/properties/birth'
+                                extInfo:
+                                  type: array
+                                  description: 附加属性
+                                  items:
+                                    $ref: '#/paths/~1edu~1student~1create/post/requestBody/content/application~1json/schema/properties/extInfo/items'
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+  /edu/student/create:
+    post:
+      operationId: studentCreate
+      summary: 创建孩子
+      description: 商户通过该接口可以创建新的孩子
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - name
+                - sex
+                - extInfo
+              properties:
+                customerId:
+                  description: 客户ID
+                  type: string
+                name:
+                  description: 孩子姓名
+                  type: string
+                nickname:
+                  description: 孩子昵称
+                  type: string
+                avatar:
+                  description: 孩子头像地址
+                  type: string
+                sex:
+                  description: 孩子性别
+                  type: integer
+                  enum:
+                    - 0
+                    - 1
+                birth:
+                  required:
+                    - birthYear
+                  type: object
+                  properties:
+                    birthYear:
+                      type: string
+                      description: 出生年份
+                    birthMonth:
+                      type: string
+                      description: 出生月分
+                    birthDay:
+                      type: string
+                      description: 出生日期
+                extInfo:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - name
+                    properties:
+                      name:
+                        type: string
+                        description: 属性名
+                      value:
+                        type: string
+                        description: 属性值
+      responses:
+        '200':
+          description: 创建结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        properties:
+                          studentId:
+                            type: integer
+                            format: int64
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码
+            * `25002` - 姓名已存在
+            * `25003` - 信息同步失败
+  /edu/student/getChildren:
+    post:
+      operationId: Student_getChildren
+      summary: 获取孩子
+      description: 商户可通过该接口获取 customer 关联的所有孩子
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - customerId
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  description: 客户 id
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        description: 读取结果
+                        properties:
+                          children:
+                            description: 孩子列表
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - name
+                                - number
+                                - sex
+                              properties:
+                                id:
+                                  type: integer
+                                  format: int64
+                                name:
+                                  type: string
+                                  description: 姓名
+                                nickname:
+                                  type: string
+                                  description: 昵称
+                                avatar:
+                                  type: string
+                                  description: 头像地址
+                                sex:
+                                  type: integer
+                                  enum:
+                                    - 0
+                                    - 1
+                                  description: |-
+                                    性别
+                                    * `0` - 男
+                                    * `1` - 女
+                                birth:
+                                  description: 生日信息
+                                  type: object
+                                  $ref: '#/paths/~1edu~1student~1create/post/requestBody/content/application~1json/schema/properties/birth'
+                                extInfo:
+                                  type: array
+                                  description: 附加属性
+                                  items:
+                                    $ref: '#/paths/~1edu~1student~1create/post/requestBody/content/application~1json/schema/properties/extInfo/items'
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+  /edu/student/listClassStudent:
+    post:
+      operationId: Student_listClassStudent
+      summary: 获取班级学员列表
+      description: 获取指定班级的学员列表
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - classId
+                - page
+                - size
+              properties:
+                classId:
+                  description: 班级ID
+                  type: integer
+                  format: int64
+                page:
+                  description: 页码
+                  type: integer
+                size:
+                  description: 每页条数
+                  type: integer
+      responses:
+        '200':
+          description: 学员列表结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - count
+                          - students
+                        properties:
+                          count:
+                            type: integer
+                            format: int64
+                            description: 总数
+                          students:
+                            type: array
+                            items:
+                              $ref: '#/paths/~1edu~1student~1getByCustomer/post/responses/200/content/application~1json/schema/oneOf/0/properties/result/properties/students/items'
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+  /edu/teacher/getByLocation:
+    post:
+      operationId: Teacher_getByLocation
+      summary: 获取门店教师
+      description: 商户可通过该接口获取指定门店的所有教师
+      tags:
+        - 教务
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                locationId:
+                  type: integer
+                  description: 门店id
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  result:
+                    type: object
+                    description: 读取结果
+                    properties:
+                      teachers:
+                        description: 教师列表
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - name
+                            - title
+                          properties:
+                            id:
+                              type: integer
+                              format: int64
+                            staffId:
+                              type: integer
+                              format: int64
+                              description: 关联的员工id
+                            name:
+                              type: string
+                              description: 姓名
+                            avatar:
+                              type: string
+                              description: 头像地址
+                            sex:
+                              type: integer
+                              enum:
+                                - 0
+                                - 1
+                              description: |-
+                                性别，注意教师性别常量和学员不同
+                                * `1` - 男
+                                * `2` - 女
+                                * `3` - 其他
+                            introduction:
+                              type: string
+                              description: 简介
+                            title:
+                              type: string
+                              description: 职称

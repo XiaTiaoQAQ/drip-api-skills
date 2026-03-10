@@ -1,0 +1,1253 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: 智店开放接口
+  description: 智店开放接口，助力商户实现系统深度融合
+  contact:
+    name: service@dripower.com
+    url: 'https://zd.drip.im'
+    email: service@dripower.com
+servers:
+  - url: 'https://zd.drip.im/open/zd'
+tags:
+  - name: 开放接口
+
+paths:
+  /booking/getServiceDetail:
+    post:
+      operationId: Booking_getServiceDetail
+      summary: 获取预约服务详情
+      description: 获取预约服务的详细信息
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  description: 预约服务id
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 预约详情结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum: true
+                      result:
+                        type: object
+                        required:
+                          - id
+                          - name
+                          - groups
+                        properties:
+                          id:
+                            type: integer
+                            format: int64
+                            description: 预约服务 id
+                          name:
+                            type: string
+                            description: 预约服务名称
+                          groups:
+                            type: array
+                            description: 预约服务关联的场地，资源，人员列表
+                            items:
+                              type: object
+                              required:
+                                - index
+                                - itemType
+                                - options
+                              properties:
+                                index:
+                                  type: integer
+                                  description: 关联组索引
+                                options:
+                                  type: array
+                                  description: 关联组规格
+                                  items:
+                                    $ref: '#/paths/~1booking~1getSpans/post/requestBody/content/application~1json/schema/properties/options/items/properties/option'
+                                itemType:
+                                  type: integer
+                                  enum:
+                                    - 0
+                                    - 1
+                                  description: |-
+
+                                    关联的资源类型
+                                    `0`:关联人员或资源
+                                    `1`:关联场地
+                          bookingFields:
+                            type: array
+                            description: 预约填写字段
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  format: int64
+                                  description: 字段 id
+                                name:
+                                  type: string
+                                  description: 字段类型
+                                required:
+                                  type: boolean
+                                  description: 是否必填
+                                type:
+                                  type: integer
+                                  enum:
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 9
+                                    - 10
+                                    - 11
+                                    - 12
+                                  description: |-
+
+                                    字段类型
+                                    - `2`: 文本
+                                    - `3`: 日期
+                                    - `4`: 时间
+                                    - `5`: 手机
+                                    - `6`: 邮箱
+                                    - `9`: 单选
+                                    - `10`: 多选
+                                    - `11`: 图片
+                                    - `12`: 长文本
+                          bindServices:
+                            type: array
+                            description: 预约服务关联的服务项目
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  description: 服务项目 id
+                                name:
+                                  type: string
+                                  description: 服务项目名称
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+  /booking/getServiceList:
+    post:
+      operationId: Booking_getServiceList
+      summary: 获取预约服务列表
+      description: 获取满足条件的门店预约服务列表
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - locationId
+              properties:
+                locationId:
+                  description: 门店id
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 预约详情结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum: true
+                      result:
+                        type: object
+                        required:
+                          - services
+                        properties:
+                          services:
+                            type: array
+                            description: 预约服务列表
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - locationId
+                                - name
+                                - pics
+                              properties:
+                                id:
+                                  type: integer
+                                  format: int64
+                                  description: 预约服务id
+                                locationId:
+                                  type: integer
+                                  format: int64
+                                  description: 门店id
+                                name:
+                                  type: 'string,'
+                                  description: 预约服务名称
+                                sortNo:
+                                  type: integer
+                                  description: 排序权重
+                                pics:
+                                  type: array
+                                  description: 预约服务图片
+                                  items:
+                                    type: string
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+  /booking/getSpans:
+    post:
+      operationId: Booking_getSpans
+      summary: 获取预约时刻表
+      description: 根据日期获取预约时刻表
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - locationId
+                - serviceId
+                - date
+              properties:
+                locationId:
+                  type: integer
+                  format: int64
+                  description: 门店 id
+                serviceId:
+                  type: integer
+                  format: int64
+                  description: 预约服务id
+                date:
+                  type: string
+                  format: date
+                  description: 日期
+                options:
+                  type: array
+                  description: 关联组规格
+                  items:
+                    type: object
+                    required:
+                      - groupIndex
+                      - option
+                    properties:
+                      groupIndex:
+                        type: integer
+                        description: 预约服务关联组索引
+                      option:
+                        type: object
+                        required:
+                          - optionId
+                          - optionName
+                        properties:
+                          optionType:
+                            type: integer
+                            enum:
+                              - 1
+                            description: |-
+                              规格类型
+                              * `1` : 场地规格
+                          optionId:
+                            type: integer
+                            description: 规格id
+                          optionGroupId:
+                            type: integer
+                            description: 规格组id
+                          optionName:
+                            type: string
+                            description: 规格名称
+                          optionGroupName:
+                            type: string
+                            description: 规格组名称
+      responses:
+        '200':
+          description: 时刻表
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - spans
+                        properties:
+                          spans:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                key:
+                                  type: string
+                                  description: 刻度key值
+                                  example: '19:00'
+                                status:
+                                  type: integer
+                                  enum:
+                                    - 0
+                                    - 1
+                                    - 2
+                                  description: |-
+                                    状态
+                                    - `0` 正常
+                                    - `1`: 已过期
+                                    - `2`: 已约完
+                                remainCount:
+                                  type: integer
+                                  description: 剩余次数
+                                originCount:
+                                  type: integer
+                                  description: 总数
+  /booking/prepareBookingOrder:
+    post:
+      operationId: Booking_prepareBookingOrder
+      summary: 获取下单信息
+      description: 获取预约下单信息（价格等）
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - bookingServiceId
+                - date
+                - timeSpans
+                - withCardDiscount
+              properties:
+                customerId:
+                  type: string
+                  description: 客户id
+                bookingServiceId:
+                  type: integer
+                  format: int64
+                  description: 预约服务id
+                date:
+                  type: string
+                  format: date
+                  example: '2000-01-01'
+                customer:
+                  type: object
+                  description: '预约客户信息,不传则使用系统客户信息'
+                  required:
+                    - name
+                    - mobile
+                  properties:
+                    name:
+                      type: string
+                      description: 姓名
+                    mobile:
+                      type: string
+                      description: 手机号
+                    gender:
+                      type: integer
+                      enum:
+                        - 1
+                        - 2
+                        - 3
+                      description: |-
+                        性别
+                        - `1` 男
+                        - `2` 女
+                        - `3` 其他
+                timeSpans:
+                  type: array
+                  description: 刻度key值
+                  items:
+                    type: string
+                  example:
+                    - '19:00'
+                    - '20:00'
+                services:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        description: 服务项目id
+                      count:
+                        type: string
+                        example: '1.25'
+                        description: 服务项目数量（服务项目可以选择数量时传入）
+                quantity:
+                  type: integer
+                  description: 预约的数量
+                options:
+                  type: array
+                  description: 指定的预约关联组规格
+                  items:
+                    $ref: '#/paths/~1booking~1getSpans/post/requestBody/content/application~1json/schema/properties/options/items'
+                withCardDiscount:
+                  type: boolean
+                  description: 是否使用会员折扣
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        properties:
+                          originalFee:
+                            type: integer
+                            description: 预约服务原价， 单位（分）
+                          discountFee:
+                            type: integer
+                            description: 预约服务会员价， 单位（分），没有表示没有会员折扣
+                          netFee:
+                            type: integer
+                            description: 预约服务价格（除去所有优惠）
+                          payAmount:
+                            type: integer
+                            description: |-
+
+                              预约订单支付的价格
+                              - 全款预约则为 netFee
+                              - 定金模式则为定金金额
+                              - 不开启付费预约则为0
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+
+            错误码
+            * `26008` 客户在黑名单中
+            * `26009` 可预约库存发生变化
+            * `26010` 客户不满足预约条件
+            * `26011` 客户储值余额不足
+            * `26012` 未到开始预约时间
+            * `26013` 已停止预约
+            * `26014` 无效会员卡折扣
+            * `26015` 无效优惠券
+  /booking/createBookingOrder:
+    post:
+      operationId: Booking_createBookingOrder
+      summary: 创建预约订单
+      description: 根据下单信息创建订单
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prepare
+                - feeInfo
+                - extraFields
+              properties:
+                prepare:
+                  description: 预约服务信息
+                  $ref: '#/paths/~1booking~1prepareBookingOrder/post/requestBody/content/application~1json/schema'
+                feeInfo:
+                  description: 预约订单信息
+                  $ref: '#/paths/~1booking~1prepareBookingOrder/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+                extraFields:
+                  type: array
+                  description: 预约填写字段
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - name
+                      - value
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        description: 字段 id
+                      name:
+                        type: string
+                        description: 字段名称
+                      value:
+                        type: any
+                        description: 预约字段值
+                expireMinutes:
+                  type: int
+                  description: 订单多久后过期
+                skipPriceCheck:
+                  type: boolean
+                  description: 不再校验价格，商户需自己保证价格安全
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - bookingOrderId
+                properties:
+                  bookingOrderId:
+                    type: string
+                    description: 预约订单 id
+                  orderId:
+                    type: string
+                    description: '订单id, 需要支付时返回'
+        default:
+          description: |-
+            错误码
+            * `26001` 预约服务不存在
+            * `26002` 预约客户不存在
+            * `26003` 预约门店不存在
+            * `26004` 预约参数非法
+            * `26005` 锁场信息为空
+            * `26007` 获取场地计费信息错误
+            * `26008` 客户在黑名单中
+            * `26009` 可预约库存发生变化
+            * `26010` 客户不满足预约条件
+            * `26011` 客户储值余额不足
+            * `26012` 未到开始预约时间
+            * `26013` 已停止预约
+            * `26014` 无效会员卡折扣
+            * `26015` 无效优惠券
+  /booking/confirmPay:
+    post:
+      operationId: bookingConfirmPay
+      summary: 确认支付成功
+      description: 商户系统确认支付成功后通过该接口修改智店预约订单状态
+      tags:
+        - 预约
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - orderId
+                - bookingOrderId
+                - payTime
+                - payType
+              properties:
+                orderId:
+                  type: string
+                  description: 订单号
+                bookingOrderId:
+                  description: 预约单号
+                  type: string
+                payTime:
+                  description: 用户支付时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+                payType:
+                  description: 支付方式，对应智店后台自定义支付方式
+                  type: string
+                  example: 自定义收款方式
+      responses:
+        '200':
+          description: 订单确认结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+            * `26022` - 预约订单不存在
+            * `26023` - 订单不存在
+            * `26024` - 订单状态错误
+  /booking/cancelOrder:
+    post:
+      operationId: bookingCancelOrder
+      summary: 取消预约
+      description: 用户预约成功后取消预约
+      tags:
+        - 预约
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - bookingOrderId
+                - reason
+              properties:
+                customerId:
+                  type: string
+                  description: 客户id
+                bookingOrderId:
+                  description: 预约单号
+                  type: string
+                reason:
+                  description: 取消原因
+                  type: string
+      responses:
+        '200':
+          description: 取消结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+            * `26022` - 预约订单不存在
+            * `26002` - 客户不存在
+  /booking/closeOrder:
+    post:
+      operationId: bookingCloseOrder
+      summary: 关闭订单
+      description: 用户关闭未支付的预约订单
+      tags:
+        - 预约
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - bookingOrderId
+              properties:
+                customerId:
+                  type: string
+                  description: 客户id
+                bookingOrderId:
+                  description: 预约单号
+                  type: string
+      responses:
+        '200':
+          description: 关闭结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+            * `26022` - 预约订单不存在
+            * `26002` - 客户不存在
+  /booking/getBookingOrder:
+    post:
+      operationId: Booking_getBookingOrder
+      summary: 获取预约订单
+      description: 根据预约订单id获取预约订单的详细信息
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookingOrderId
+              properties:
+                bookingOrderId:
+                  description: 预约订单id
+                  type: string
+      responses:
+        '200':
+          description: 预约订单查询结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum: true
+                      result:
+                        type: object
+                        required:
+                          - customerId
+                          - bookingServiceId
+                          - locationId
+                          - detail
+                          - startAt
+                          - serviceDate
+                          - endAt
+                          - quantity
+                          - status
+                        properties:
+                          customerId:
+                            type: string
+                            description: 客户id
+                          bookingServiceId:
+                            type: integer
+                            format: int64
+                            description: 预约服务id
+                          serviceDate:
+                            type: string
+                            format: date
+                            example: '2000-01-01'
+                            description: 服务日期
+                          startAt:
+                            type: string
+                            format: date
+                            example: '2000-01-01 00:00:00'
+                            description: 开始时间
+                          endAt:
+                            type: string
+                            format: date
+                            example: '2000-01-01 00:00:00'
+                            description: 结束时间
+                          locationId:
+                            type: integer
+                            format: int64
+                            description: 门店id
+                          quantity:
+                            type: integer
+                            description: 预约的数量
+                          extraFields:
+                            type: array
+                            items:
+                              $ref: '#/paths/~1booking~1createBookingOrder/post/requestBody/content/application~1json/schema/properties/extraFields/items'
+                          detail:
+                            oneOf:
+                              - type: object
+                                properties:
+                                  Normal:
+                                    type: object
+                                    description: 非场地模式详情
+                                    required:
+                                      - spans
+                                    properties:
+                                      spans:
+                                        type: array
+                                        items:
+                                          type: string
+                                          example: '10:00:00'
+                              - type: object
+                                properties:
+                                  Playground:
+                                    type: object
+                                    description: 场地模式详情
+                                    required:
+                                      - playgrounds
+                                    properties:
+                                      playgrounds:
+                                        type: array
+                                        items:
+                                          type: object
+                                          required:
+                                            - playgroundGroupName
+                                            - playgroundGroupId
+                                            - playgroundName
+                                            - playgroundId
+                                            - date
+                                            - startAt
+                                            - endAt
+                                          properties:
+                                            playgroundGroupName:
+                                              type: string
+                                              description: 场地组名称
+                                            playgroundGroupId:
+                                              type: integer
+                                              description: 场地组id
+                                            playgroundName:
+                                              type: string
+                                              description: 场地名称
+                                            playgroundId:
+                                              type: integer
+                                              description: 场地id
+                                            date:
+                                              type: string
+                                              format: date
+                                              description: 预约日期
+                                            startAt:
+                                              type: 'string,'
+                                              example: '2000-01-01 00:00:00'
+                                              description: 开始时间
+                                            endAt:
+                                              type: string
+                                              example: '2000-01-01 00:00:00'''
+                                              description: 结束时间
+                          order:
+                            type: object
+                            required:
+                              - id
+                              - pay_amount
+                              - gmt_create
+                            properties:
+                              id:
+                                type: string
+                                description: 订单id
+                              payAmount:
+                                type: integer
+                                description: 订单支付金额（分）
+                              gmtCreate:
+                                type: string
+                                example: '2000-01-01 00:00:00'
+                                description: 订单下单时间
+                              extTradeNo:
+                                type: string
+                                description: 外部单号
+                          status:
+                            type: integer
+                            enum:
+                              - 0
+                              - 1
+                              - 2
+                              - 3
+                              - -1
+                              - -2
+                              - -3
+                              - -5
+                            description: |-
+
+                              * `0` - 待支付
+                              * `1` - 预约成功
+                              * `2` - 已开单
+                              * `3` - 已完成
+                              * `-1` - 订单未支付超时关闭
+                              * `-2` - 订单已取消
+                              * `-3` - 订单已过期
+                              * `-5` - 课程缺课
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码
+            * `26022` 预约订单不存在
+  /booking/listBookingOrder:
+    post:
+      operationId: Booking_listBookingOrder
+      summary: 获取预约订单列表
+      description: 根据条件查询预约订单列表
+      tags:
+        - 预约
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - minCreate
+                - maxCreate
+                - page
+                - size
+              properties:
+                minCreate:
+                  description: 订单创建最小时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+                maxCreate:
+                  description: 订单创建最大时间
+                  type: string
+                  example: '2000-01-01 00:00:00'
+                page:
+                  type: integer
+                  description: 页码
+                  example: 1
+                size:
+                  type: integer
+                  description: 每页条数，最多100
+                  example: 10
+      responses:
+        '200':
+          description: 时刻表
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - bookingOrders
+                        properties:
+                          bookingOrders:
+                            type: array
+                            description: 预约订单列表
+                            items:
+                              $ref: '#/paths/~1booking~1getBookingOrder/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+  /booking/playground/getAll:
+    post:
+      operationId: BookingPlayGround_getAll
+      summary: 获取预约场地列表
+      description: 获取指定门店所有的预约场地列表
+      tags:
+        - 场地
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - locationId
+              properties:
+                locationId:
+                  type: integer
+                  description: 门店id
+      responses:
+        '200':
+          description: 使用记录结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - data
+                        properties:
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - name
+                                - groupId
+                                - groupName
+                              properties:
+                                id:
+                                  type: long
+                                  description: 场地id
+                                name:
+                                  type: string
+                                  description: 场地名称
+                                groupId:
+                                  type: integer
+                                  description: 场地组id
+                                groupName:
+                                  type: string
+                                  description: 场地组名称
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+  /booking/playground/getBookingRecords:
+    post:
+      operationId: BookingPlayGround_getBookingRecords
+      summary: 获取场地预约记录
+      description: 获取指定场地未开始的预约记录列表
+      tags:
+        - 场地
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - playgroundId
+              properties:
+                minStart:
+                  type: string
+                  example: '2022-01-01 00:00:00'
+                  description: 最小开始时间，默认当前时间
+                playgroundId:
+                  type: integer
+                  description: 场地id
+                nextRecordSize:
+                  type: integer
+                  description: 读取未开始到预约记录条数
+      responses:
+        '200':
+          description: 使用记录结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - data
+                        properties:
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - customerId
+                                - customerMobile
+                                - startAt
+                                - endAt
+                                - extraFields
+                              properties:
+                                id:
+                                  type: integer
+                                  description: 场地预约记录id
+                                customerId:
+                                  type: string
+                                  description: 预约客户id
+                                customerName:
+                                  type: string
+                                  description: 预约客户姓名
+                                customerMobile:
+                                  type: string
+                                  description: 预约客户手机号
+                                startAt:
+                                  type: string
+                                  example: '2022-01-01 00:00:00'
+                                endAt:
+                                  type: string
+                                  example: '2022-01-01 00:00:00'
+                                extraFields:
+                                  type: object
+                                  description: 预约填写字段
+                                  example:
+                                    - 人数: 3
+                                    - 是否订餐: true
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |
+            错误码
+  /people/getStat:
+    post:
+      operationId: People_getStat
+      summary: 获取客流统计
+      description: 获取指定场馆或总人流的实时统计信息，包括当前人数、限制人数和拥挤程度。
+      tags:
+        - 客流
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                locationId:
+                  type: integer
+                  format: int64
+                  description: 场馆ID (可选，不填则获取总人流统计)
+      responses:
+        '200':
+          description: 人流统计结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - currentNum
+                          - peopleLimitNum
+                          - crowding
+                        properties:
+                          currentNum:
+                            type: integer
+                            description: 当前人数
+                          peopleLimitNum:
+                            type: integer
+                            description: 人流限制数量
+                          crowding:
+                            type: string
+                            description: 拥挤程度
+                            enum:
+                              - low
+                              - medium
+                              - high
+                              - full
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+
+webhooks:
+  BookingOrderStatusChange:
+    post:
+      summary: 预约订单状态变更
+      description: 预约订单状态发生变更时推送提醒
+      requestBody:
+        description: 提醒消息
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventType
+                - payload
+              properties:
+                eventType:
+                  type: string
+                  enum:
+                    - BookingOrderStatusChange
+                payload:
+                  type: object
+                  required:
+                    - id
+                    - status
+                  properties:
+                    id:
+                      type: string
+                      description: 预约订单id
+                    status:
+                      type: integer
+                      enum:
+                        - 0
+                        - 1
+                        - 2
+                        - 3
+                        - -1
+                        - -2
+                        - -3
+                        - -5
+                      description: |-
+
+                        * `0` - 待支付
+                        * `1` - 预约成功
+                        * `2` - 已开单
+                        * `3` - 已完成
+                        * `-1` - 订单未支付超时关闭
+                        * `-2` - 订单已取消
+                        * `-3` - 订单已过期
+                        * `-5` - 课程缺课
+  BookingPlayGroundOccupyStatusChange:
+    post:
+      summary: 场地状态变更提醒
+      description: 场地状态变更时推送
+      requestBody:
+        description: 提醒消息
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventType
+                - payload
+              properties:
+                eventType:
+                  type: string
+                  enum:
+                    - BookingPlayGroundOccupyStatusChange
+                payload:
+                  type: object
+                  required:
+                    - playgroundId
+                    - status
+                    - startAt
+                    - endAt
+                  properties:
+                    playgroundId:
+                      type: integer
+                      description: 场地ID
+                    startAt:
+                      type: string
+                      example: '2000-01-01 00:00:00'
+                    endAt:
+                      type: string
+                      example: '2000-01-01 00:00:00'
+                    status:
+                      type: integer
+                      enum:
+                        - 1
+                        - -1
+                      description: |-
+
+                        * `1` 已占用
+                        * `-1` 已取消占用
+  BookingOrderInfoChange:
+    post:
+      summary: 预约订单信息变更
+      description: 预约订单信息发生变更（用户填写字段和改期）时通知
+      requestBody:
+        description: 提醒消息
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventType
+                - payload
+              properties:
+                eventType:
+                  type: string
+                  enum:
+                    - BookingOrderInfoChange
+                payload:
+                  type: object
+                  required:
+                    - id
+                    - status
+                  properties:
+                    id:
+                      type: string
+                      description: 预约订单id
+                    modifyTime:
+                      type: string
+                      description: 更新时间
+                    modifyType:
+                      type: integer
+                      enum:
+                        - 1
+                        - 2
+                      description: |-
+                        修改类型
+                        * `1` - 更新字段
+                        * `2` - 改期

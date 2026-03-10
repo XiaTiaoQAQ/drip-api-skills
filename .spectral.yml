@@ -1,0 +1,9 @@
+extends: [[spectral:oas, off]]
+
+rules:
+  oas3-schema: true
+  oas3-valid-schema-example: true
+  no-eval-in-markdown: true
+  operation-description: warn
+  operation-operationId: warn
+  path-params: error

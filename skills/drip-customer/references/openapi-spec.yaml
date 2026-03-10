@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: 智店开放接口
+  description: 智店开放接口，助力商户实现系统深度融合
+  contact:
+    name: service@dripower.com
+    url: 'https://zd.drip.im'
+    email: service@dripower.com
+servers:
+  - url: 'https://zd.drip.im/open/zd'
+tags:
+  - name: 开放接口
+
+paths:
+  /customer/getByMobile:
+    post:
+      operationId: Customer_getByMobile
+      summary: 根据手机号获取客户信息
+      description: 根据手机号获取客户信息
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mobile:
+                  description: 手机号
+                  type: string
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - id
+                          - mobile
+                        properties:
+                          id:
+                            type: string
+                          mobile:
+                            type: string
+                          unionid:
+                            type: string
+                          avatar:
+                            type: string
+                            description: 用户头像
+                          realName:
+                            type: string
+                          nickName:
+                            type: string
+                            description: 用户名称
+                          birth:
+                            type: string
+                            format: date
+                          countryCode:
+                            type: string
+                            description: 手机国家码
+                          province:
+                            type: string
+                            description: 省
+                          city:
+                            type: string
+                            description: 市
+                          district:
+                            type: string
+                            description: 区
+                          address:
+                            type: string
+                            description: 详细地址
+                          career:
+                            type: string
+                            description: 职业
+                          extProps:
+                            type: object
+                            additionalProperties:
+                              type: any
+                          gender:
+                            type: integer
+                            enum:
+                              - 1
+                              - 2
+                              - 3
+                            description: |
+                              * `1` -- 男
+                              * `2` -- 女
+                              * `3` -- 其他
+                          createTime:
+                            type: string
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+  /customer/registerByMobile:
+    post:
+      operationId: registerByMobile
+      summary: 根据手机号注册新客户
+      description: 商户在获取手机号后，如果发现智店没有该客户，可以使用本接口注册一个新客户
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - mobile
+              type: object
+              properties:
+                mobile:
+                  description: 手机号
+                  type: string
+                countryCode:
+                  description: 国家码，如 +86
+                  type: string
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        properties:
+                          customerId:
+                            type: string
+                            description: 客户 id
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+  /customer/getExtProps:
+    post:
+      operationId: Customer_getProps
+      summary: 获取自定义属性
+      description: 获取所有自定义属性列表
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: 属性列表
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        properties:
+                          props:
+                            type: array
+                            description: 属性列表
+                            items:
+                              required:
+                                - name
+                                - key
+                                - type
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  description: 属性名
+                                key:
+                                  type: string
+                                  description: 属性key
+                                type:
+                                  type: int
+                                  enum:
+                                    - 0
+                                    - 1
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 7
+                                    - 8
+                                    - 9
+                                    - 10
+                                    - 11
+                                    - 12
+                                  description: |-
+                                    属性类型
+                                    * `0` boolean
+                                    * `1` 数值(整数)
+                                    * `2` 文本
+                                    * `3` 日期(不含时间)
+                                    * `4` 日期(含时间)
+                                    * `5` 手机号码
+                                    * `6` 邮箱
+                                    * `8` 数字(只包含数字文本)
+                                    * `9` 选项
+                                    * `10` 多选
+                                    * `11` 图片地址
+                                    * `12` 长文本
+                                enumValues:
+                                  type: object
+                                  description: 枚举值说明（单选和多选选项）
+                                  example:
+                                    '1': 男
+                                    '2': 女
+                                    '3': 其他
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: 错误码
+  /customer/list:
+    post:
+      operationId: Customer_list
+      summary: 获取客户列表
+      description: 分批获取客户列表
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - size
+              properties:
+                size:
+                  description: 每次获取记录数量
+                  type: integer
+                startCursor:
+                  description: 开始位置格式为 createTime|id 不传表示从头开始
+                  type: string
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - customers
+                          - nextCursor
+                        properties:
+                          customers:
+                            type: array
+                            items:
+                              $ref: '#/paths/~1customer~1getByMobile/post/responses/200/content/application~1json/schema/oneOf/0/properties/result'
+                          nextCursor:
+                            type: string
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+  /customer/updateProps:
+    post:
+      operationId: Customer_updateProps
+      summary: 更新客户属性
+      description: 传入属性key和值更新客户属性
+      tags:
+        - 客户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - id
+              type: object
+              properties:
+                id:
+                  description: 客户id
+                  type: string
+                fields:
+                  description: |-
+                    须更新的内置属性 `{"key1": value1, "key2":value2}` (json object 格式)。支持更新的属性
+                    * `realName` 真实姓名
+                    * `remarkName` 用户备注
+                    * `gender` 性别
+                    * `birth` 生日
+                    * `province` 省
+                    * `city` 市
+                    * `district` 区
+                    * `adress` 地址
+                    * `nickName` 昵称
+                    * `avatar` 头像
+                  type: object
+                  additionalProperties:
+                    type: any
+                extFields:
+                  type: object
+                  additionalProperties:
+                    type: any
+                  description: '须更新的自定义属性 `{"key1": value1, "key2":value2}` (json object 格式)。支持更新的属性可通过获取自定义属性接口读取'
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            错误码
+            * 23001 客户不存在
+            * 23003 属性不存在或不支持更新
+            * 23004 属性值格式错误
+  /card/getByMobile:
+    post:
+      operationId: Card_getByMobile
+      summary: 获取会员信息
+      description: 根据客户手机号获取会员信息
+      tags:
+        - 会员
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mobile:
+                  description: 手机号
+                  type: string
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        enum:
+                          - true
+                      result:
+                        type: object
+                        required:
+                          - cardId
+                          - cardName
+                          - cardLogo
+                          - effetAt
+                          - expiredAt
+                        properties:
+                          cardId:
+                            type: integer
+                            description: 会员卡id
+                          cardName:
+                            type: string
+                            description: 会员卡等级
+                          cardLogo:
+                            type: string
+                            description: 会员卡 logo
+                          growth:
+                            type: number
+                            description: 成长值，成长型会员时返回
+                          effectAt:
+                            type: string
+                            example: '2022-01-01 00:00:00'
+                            description: 生效时间
+                          expiredAt:
+                            type: string
+                            example: '2022-01-01 00:00:00'
+                            description: 过期时间
+                  - $ref: '#/paths/~1tcard~1use/post/responses/200/content/application~1json/schema/oneOf/1'
+        default:
+          description: |-
+            * `21001` 客户信息不存在
+            * `21002` 会员信息不存在
+            * `21003` 会员卡信息不存在
