@@ -1,10 +1,10 @@
 # drip-openapi
 
-水滴智店 (Drip Smart Store) 开放接口 Claude Code Skill 插件。
+水滴智店 (Drip Smart Store) 开放接口 Claude Code Skill、OpenClaw Skills 插件。
 
 ## 简介
 
-将水滴智店 OpenAPI 封装为 Claude Code Skill，让 AI 助手能够直接调用水滴智店的全部开放接口，涵盖预约、次卡、客户、教务、订单、积分、会员、场地、客流等 9 大模块，共 50+ 个 API 端点。
+将水滴智店 OpenAPI 封装为 Claude Code Skill，让 Claude Code或者Openclaw 等支持通用skills协议的工具能够直接调用水滴智店的全部开放接口，涵盖预约、次卡、客户、教务、订单、积分、会员、场地、客流等 9 大模块，共 50+ 个 API 端点。
 
 ## 快速开始
 
