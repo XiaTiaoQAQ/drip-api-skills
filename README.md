@@ -4,7 +4,11 @@
 
 ## 简介
 
-将水滴智店 OpenAPI 封装为 Claude Code Skill，让 Claude Code或者Openclaw 等支持通用skills协议的工具能够直接调用水滴智店的全部开放接口，涵盖预约、次卡、客户、教务、订单、积分、会员、场地、客流等 9 大模块，共 50+ 个 API 端点。
+将水滴智店 OpenAPI 封装为 Claude Code Skill，
+让 Claude Code或者Openclaw 等支持通用skills协议的工具
+能够直接调用水滴智店的全部开放接口，
+涵盖预约、次卡、客户、教务、订单、积分、会员、场地、
+客流等 9 大模块，共 50+ 个 API 端点。
 
 ## 快速开始
 
@@ -24,13 +28,15 @@ git clone <repo-url> && cd drip-openapi
 ```bash
 cp .env.example .env
 # 编辑 .env，填入平台分配的 client_id 和 client_secret
+
+编辑成功后，不要执行重启操作，尤其是OpenClaw环境下，即便一定要求重启也需要向用户二次确认。
 ```
 
 ### 3. 使用
 
-在 Claude Code 中直接用自然语言调用水滴 API：
+在 Claude Code、OpenClaw 中直接用自然语言调用水滴 API：
 
-```
+```text
 "帮我查询手机号 13800138000 的客户信息"
 "查看明天上午的预约时刻表"
 "给客户增加 100 积分"
@@ -57,7 +63,7 @@ cp .env.example .env
 
 所有接口使用双重 SHA256 签名认证：
 
-```
+```text
 sign = sha256(sha256(body + client_secret + ts) + client_secret)
 ```
 
@@ -65,7 +71,7 @@ sign = sha256(sha256(body + client_secret + ts) + client_secret)
 
 ## 项目结构
 
-```
+```text
 drip-openapi/
 ├── CLAUDE.md                          # Claude Code 项目指引
 ├── SKILL.md                           # Skill 统一入口

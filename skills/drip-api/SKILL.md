@@ -14,6 +14,7 @@ description: "This skill should be used when the user asks to \"call Drip API\",
 查询类接口（getById、getByIds、filter、list、get 等）可直接执行，无需确认。
 
 确认流程：
+
 1. 组装好请求参数后，先向用户展示操作摘要（接口、关键参数、预期效果）
 2. 等待用户确认（如："确认执行"、"好的"、"执行吧"）
 3. 用户确认后才发送请求
@@ -36,7 +37,7 @@ description: "This skill should be used when the user asks to \"call Drip API\",
 
 ### 签名算法
 
-```
+```text
 sign = sha256(sha256(body + client_secret + ts) + client_secret)
 ```
 
@@ -55,12 +56,15 @@ TS=$(date +%s)
 BODY='{"mobile":"13800138000"}'
 
 # 2. 计算签名
-INNER=$(echo -n "${BODY}${CLIENT_SECRET}${TS}" | sha256sum | awk '{print $1}')
-SIGN=$(echo -n "${INNER}${CLIENT_SECRET}" | sha256sum | awk '{print $1}')
+INNER=$(echo -n "${BODY}${CLIENT_SECRET}${TS}" \
+  | sha256sum | awk '{print $1}')
+SIGN=$(echo -n "${INNER}${CLIENT_SECRET}" \
+  | sha256sum | awk '{print $1}')
 
 # 3. 发送请求
+ENDPOINT="https://zd.drip.im/open/zd/customer/getByMobile"
 curl -X POST \
-  "https://zd.drip.im/open/zd/customer/getByMobile?client_id=${CLIENT_ID}&ts=${TS}&sign=${SIGN}" \
+  "${ENDPOINT}?client_id=${CLIENT_ID}&ts=${TS}&sign=${SIGN}" \
   -H "Content-Type: application/json" \
   -d "${BODY}"
 ```
@@ -70,6 +74,7 @@ curl -X POST \
 ## 通用响应格式
 
 **成功：**
+
 ```json
 {
   "success": true,
@@ -78,6 +83,7 @@ curl -X POST \
 ```
 
 **失败：**
+
 ```json
 {
   "success": false,
@@ -99,16 +105,17 @@ curl -X POST \
 | `/tcard/confirmOrder` | 确认订单支付成功 |
 | `/tcard/refundOrder` | 次卡订单退款 |
 | `/tcard/use` | 核销（使用）次卡 |
-| `/tcard/send` | 直接发放次卡给客户 |
+| `/tcard/send` | 直接发放次卡给客户（不校验领取限制、不触发发卡通知、不执行赠送逻辑） |
 | `/tcard/transfer` | 次卡转卡至另一客户 |
 | `/tcard/getUseRecord` | 获取次卡使用记录（分页） |
 | `/tcard/getFetches` | 获取客户已领取的次卡列表 |
-| `/tcard/getFetchCode` | 获取次卡二维码 |
+| `/tcard/getFetchCode` | 获取次卡二维码（注意用户权限检验） |
 | `/tcard/getShareRecord` | 获取次卡分享记录 |
 | `/tcard/bindShare` | 绑定次卡分享关系 |
 | `/tcard/unbindShare` | 解除次卡分享关系 |
 
 **错误码：**
+
 - `24001` 次卡不存在
 - `24002` 次卡已过期
 - `24003` 客户不存在
@@ -155,6 +162,7 @@ curl -X POST \
 | `/booking/listBookingOrder` | 查询预约订单列表（按时间范围分页） |
 
 **预约订单状态码：**
+
 - `0` 待支付
 - `1` 预约成功
 - `2` 已开单
@@ -165,6 +173,7 @@ curl -X POST \
 - `-5` 课程缺课
 
 **错误码：**
+
 - `26001` 预约服务不存在
 - `26002` 客户不存在
 - `26003` 门店不存在
@@ -196,9 +205,12 @@ curl -X POST \
 | `/edu/student/create` | 创建孩子 |
 | `/edu/student/getChildren` | 获取客户关联的所有孩子 |
 
-**客户可更新的内置属性：** `realName`, `remarkName`, `gender`, `birth`, `province`, `city`, `district`, `adress`, `nickName`, `avatar`
+**客户可更新的内置属性：** `realName`, `remarkName`,
+`gender`, `birth`, `province`, `city`, `district`,
+`adress`, `nickName`, `avatar`
 
 **错误码：**
+
 - `23001` 客户不存在
 - `23003` 属性不存在或不支持更新
 - `23004` 属性值格式错误
@@ -219,6 +231,7 @@ curl -X POST \
 **课程类型：** `1` 预约课, `2` 班级排课
 
 **错误码：**
+
 - `25001` 暂无课程
 
 ### 订单模块 (4 endpoints)
@@ -230,11 +243,20 @@ curl -X POST \
 | `/order/queryByCustomer` | 根据客户查询订单列表（分页，支持按类型/支付方式过滤） |
 | `/order/countByCustomer` | 根据客户查询订单数量 |
 
-**订单类型：** `10` 会员卡购买, `11` 会员卡升级, `12` 储值, `13` 预约, `14` 会员卡续费, `15` 次卡购买-自助, `16` 线下收银, `18` 次卡购买-商家售卖, `19` 商城购买, `20` 拼团, `21` 消费补录, `22` 线上购买课程, `24` 积分兑换, `25` 跨店下单, `26` 门禁, `29` 赛事报名, `30` 班级报名, `34` 自助售票机, `37` 开台, `39` 手牌消费
+**订单类型：** `10` 会员卡购买, `11` 会员卡升级,
+`12` 储值, `13` 预约, `14` 会员卡续费,
+`15` 次卡购买-自助, `16` 线下收银,
+`18` 次卡购买-商家售卖, `19` 商城购买, `20` 拼团,
+`21` 消费补录, `22` 线上购买课程, `24` 积分兑换,
+`25` 跨店下单, `26` 门禁, `29` 赛事报名,
+`30` 班级报名, `34` 自助售票机, `37` 开台,
+`39` 手牌消费
 
-**支付方式：** `1` 微信, `2` 支付宝, `3` 现金, `4` 银联, `5` 储值卡, `6` 外部自定义支付, `7` 押金
+**支付方式：** `1` 微信, `2` 支付宝, `3` 现金,
+`4` 银联, `5` 储值卡, `6` 外部自定义支付, `7` 押金
 
 **错误码：**
+
 - `20001` 订单不存在
 - `20002` 员工不存在
 - `20003` 发货类型错误
@@ -250,9 +272,15 @@ curl -X POST \
 | `/score/mutate` | 修改客户积分（加/减） |
 | `/score/listRecord` | 获取积分变更记录（分页） |
 
-**积分来源：** `1` 积分商城兑换, `2` 管理操作, `3` 会员升级, `4` 邀请开卡, `5` 储值奖励, `6` 积分导入, `7` 预约, `8` 收款, `9` 次卡购买, `10` 商城下单抵扣, `11` 拼团购买奖励, `12` 商城购买奖励, `13` 商城订单退款, `14` 消费补录, `15` 取消兑换礼品, `16` 接口写入
+**积分来源：** `1` 积分商城兑换, `2` 管理操作,
+`3` 会员升级, `4` 邀请开卡, `5` 储值奖励,
+`6` 积分导入, `7` 预约, `8` 收款, `9` 次卡购买,
+`10` 商城下单抵扣, `11` 拼团购买奖励,
+`12` 商城购买奖励, `13` 商城订单退款,
+`14` 消费补录, `15` 取消兑换礼品, `16` 接口写入
 
 **错误码：**
+
 - `22001` 积分客户不存在
 - `22002` 增减积分类型错误
 - `22003` 修改积分失败
@@ -264,6 +292,7 @@ curl -X POST \
 | `/card/getByMobile` | 根据手机号获取会员卡信息（等级、成长值、有效期） |
 
 **错误码：**
+
 - `21001` 客户信息不存在
 - `21002` 会员信息不存在
 - `21003` 会员卡信息不存在
@@ -295,7 +324,7 @@ curl -X POST \
 
 **场地占用状态：** `1` 已占用, `-1` 已取消占用
 
-**订单信息修改类型：** `1` 更新字段
+**订单信息修改类型：** `1` 更新字段, `2` 改期
 
 ## 通用错误码
 

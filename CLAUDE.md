@@ -14,7 +14,7 @@
 
 所有 API 请求需要双重 SHA256 签名：
 
-```
+```text
 sign = sha256(sha256(body + client_secret + ts) + client_secret)
 ```
 

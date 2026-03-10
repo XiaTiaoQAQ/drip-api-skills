@@ -15,7 +15,7 @@ description: "当用户提到 \"教务\"、\"课程表\"、\"排课\"、\"班级
 
 ### 签名算法
 
-```
+```text
 sign = sha256(sha256(body + client_secret + ts) + client_secret)
 ```
 
