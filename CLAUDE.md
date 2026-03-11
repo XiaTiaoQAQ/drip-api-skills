@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-水滴智店 (Drip Smart Store) OpenAPI 的 Claude Code Skill 插件。将水滴智店的开放接口封装为 AI 可调用的 skill。
+水滴智店 (Drip Smart Store) OpenAPI 智能体技能插件（适用于 Claude Code、OpenClaw 等智能体平台）。将水滴智店的开放接口封装为 AI 可调用的 skill。
 
 ## 安全规范
 

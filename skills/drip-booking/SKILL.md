@@ -1,6 +1,6 @@
 ---
 name: drip-booking
-description: "当用户提到 \"预约\"、\"booking\"、\"场地\"、\"playground\"、\"客流\"、\"预约服务\"、\"时刻表\"、\"webhook\" 时使用此 skill。"
+description: "水滴智店预约与场地管理智能体技能插件（适用于 Claude Code、OpenClaw 等智能体平台）。当用户提到 \"预约\"、\"booking\"、\"场地\"、\"playground\"、\"客流\"、\"预约服务\"、\"时刻表\"、\"webhook\" 时使用。"
 ---
 
 # 水滴智店 - 预约与场地管理模块

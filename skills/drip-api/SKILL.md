@@ -1,11 +1,11 @@
 ---
 name: drip-api
-description: "This skill should be used when the user asks to \"call Drip API\", \"use 水滴 API\", \"integrate with 水滴智店\", \"manage bookings via Drip\", \"manage tcard\", \"query customers in Drip\", \"manage 次卡\", \"manage 预约\", \"manage 会员\", \"manage 积分\", \"manage 教务\", \"manage 订单\", \"manage 场地\", or any task involving the 水滴智店 (Drip Smart Store) open API."
+description: "水滴智店全量开放接口智能体技能插件（适用于 Claude Code、OpenClaw 等智能体平台）。当用户提到 \"call Drip API\"、\"use 水滴 API\"、\"integrate with 水滴智店\"、\"查水滴数据\"、\"水滴智店最近\"、\"manage bookings via Drip\"、\"manage tcard\"、\"query customers in Drip\"、\"manage 次卡\"、\"manage 预约\"、\"manage 会员\"、\"manage 积分\"、\"manage 教务\"、\"manage 订单\"、\"manage 场地\" 或任何涉及水滴智店 (Drip Smart Store) 开放 API 的任务时使用。"
 ---
 
 # 水滴智店开放接口 (Drip Smart Store OpenAPI)
 
-水滴智店是线下商户智能门店 SaaS 平台，提供预约、次卡、会员、教务、积分、订单、场地、客流等模块的开放 API。
+水滴智店是线下商户智能门店 SaaS 平台，提供预约、次卡、会员、教务、积分、订单、场地、客流等模块的开放 API。本技能适用于 Claude Code、OpenClaw 等智能体平台。
 
 ## 二次确认规则
 

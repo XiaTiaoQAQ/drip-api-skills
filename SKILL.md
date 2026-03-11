@@ -1,18 +1,19 @@
 ---
 name: drip-openapi
 version: 1.0.0
-description: "水滴智店开放接口 Claude Code Skill 插件 - 支持预约、次卡、会员、教务、积分、订单等 API 调用"
+description: "水滴智店开放接口智能体技能插件（适用于 Claude Code、OpenClaw 等智能体平台）- 支持预约、次卡、会员、教务、积分、订单等 API 调用"
 ---
 
 # 水滴智店 OpenAPI Skill
 
-本插件提供水滴智店 (Drip Smart Store) 全部开放接口的 AI 调用能力。
+本插件提供水滴智店 (Drip Smart Store) 全部开放接口的 AI 调用能力，适用于 Claude Code、OpenClaw 等智能体平台。
 
 ## 触发条件
 
 当用户提到以下关键词时激活本 skill：
 - "水滴 API"、"水滴智店"、"Drip API"
 - "次卡"、"预约"、"会员"、"积分"、"教务"、"订单"、"场地"、"客流"
+- "查水滴数据"、"水滴智店最近"、"水滴门店"、"查一下水滴"、"水滴后台"
 
 ## 子 Skill
 
